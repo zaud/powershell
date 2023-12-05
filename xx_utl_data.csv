@@ -1,0 +1,14 @@
+key, value
+"LANG_UTF8_設定", "LANG=ja_JP.UTF8"
+"ダブルクオーテーション削除", "sed -i 's/\"//g' "
+"生協コード前0修正", "update {} set use_seikyo_cd = substr(USE_SEIKYO_CD, 2, 3) || ' ';"
+"生協コード前0確認", "select distinct USE_SEIKYO_CD from {};"
+"select count", "select count(*) from {}"
+"truncate table", "truncate table {}"
+"管理マスタ BATCHDATE 更新", "UPDATE H_M_MAIN_CTL_U SET CTL_NUM1 = '{}' ,SYSM = SYSDATE WHERE ID_TYPE = 'BATCHDATE';"
+"日付管理マスタ（H_M_DTKNR）更新", "UPDATE H_M_DTKNR SET SYR_DT = '{}', SYSM = SYSDATE WHERE DTKNR_KB = '1';"
+"管理マスタ 確認", "SELECT * FROM  H_M_MAIN_CTL_U WHERE ID_TYPE = 'BATCHDATE';"
+"日付管理マスタ（H_M_DTKNR）確認", "SELECT * FROM  H_M_DTKNR WHERE DTKNR_KB = '1';"
+"管理マスタ 全確認", "select * from H_M_MAIN_CTL_U order by id_type;" 
+
+
