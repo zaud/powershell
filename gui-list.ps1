@@ -8,9 +8,9 @@ Add-Type -AssemblyName System.Drawing
 $xWid = 280
 $xinWid = $xWid - 40
 $xHei = 455
-$xinHei = $xHei - 125
+$xinHei = $xHei - 150
 $bottom1 = $xHei - 65
-$bottom2 = $xHei - 115
+$bottom2 = $xHei - 145
 
 $script:orgBkup = ""
 
@@ -30,7 +30,7 @@ foreach ($item in $csv_data) {
 }
 
 $objListBox = New-Object ListBox -Property @{
-    Location = New-Object System.Drawing.Size(10,10)
+    Location = New-Object System.Drawing.Point(10,0)
     Size = New-Object System.Drawing.Size($xinWid, $xinHei)
 }
 $objForm.Controls.Add($objListBox)
@@ -66,7 +66,7 @@ function SetColorTxt {
 
 $setTextBox = New-Object RichTextBox -Property @{
     Location = New-Object System.Drawing.Point(10, $bottom2)
-    Size = New-Object System.Drawing.Size($xinWid, 45)
+    Size = New-Object System.Drawing.Size($xinWid, 75)
 }
 $objForm.Controls.Add($setTextBox)
 
