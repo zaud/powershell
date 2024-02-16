@@ -1,16 +1,16 @@
 #
-# function ���ŏ��ɓo�^���Ă����āA���ł��g����悤�ɂ���B
-# �ȒP�Ȑ����� hashtable �ɂ��āA�\������B
+# function を最初に登録しておいて、いつでも使えるようにする。
+# 簡単な説明を hashtable にして、表示する。
 #
 $manhash = @{}
 
 $manhash["tsvInsert"] = @"
-tsv�̃f�[�^���� INSERT �����쐬���Ė߂�(�i���Łj
- - table_name �͈���2�ڂœn��
- - TSV1�s�ځi�񖼁j�́@#�t����NUMBER�Ƃ��āu"�v�ɂ��N�I�[�g���s��Ȃ��B
- - TSV1�s�ځi�񖼁j�́@$�t����DATE�Ƃ��āAYYYY/MM/DD hh:mm:ss ��
-   �㔼�����i���ԁj���J�b�g����B
- - ���g�̖����s��INSERT���͍��Ȃ��B
+tsvのデータから INSERT 文を作成して戻す(進化版）
+ - table_name は引数2つ目で渡す
+ - TSV1行目（列名）の　#付きをNUMBERとして「"」によるクオートを行わない。
+ - TSV1行目（列名）の　$付きをDATEとして、YYYY/MM/DD hh:mm:ss の
+   後半部分（時間）をカットする。
+ - 中身の無い行のINSERT文は作らない。
 "@
 function tsvInsert($tsv, $tblN) {
   $lines = $tsv -split "`n" 
@@ -25,7 +25,7 @@ function tsvInsert($tsv, $tblN) {
     $isDate += $item.Contains("$")
     $headStr = $headStr + $item.Replace("`#","").Replace("$","") + ","
   }
-  $headStr = $headStr.Substring(0, $headStr.Length - 1)    # �]�v��","���폜
+  $headStr = $headStr.Substring(0, $headStr.Length - 1)    # 余計な","を削除
   $headStr = $headStr + ")`n"
 
   $insertSql = ""
@@ -45,7 +45,7 @@ function tsvInsert($tsv, $tblN) {
           $insertSql = $insertSql + "'" + $datas[$i] + "',"
         }
       }
-      $insertSql = $insertSql.Substring(0, $insertSql.Length - 1)    # �]�v��","���폜
+      $insertSql = $insertSql.Substring(0, $insertSql.Length - 1)    # 余計な","を削除
       $insertSql = $insertSql + ");`n"
     }
   }
@@ -53,11 +53,11 @@ function tsvInsert($tsv, $tblN) {
 }
 
 $manhash["clipTsvInsert"] = @"
-tsv �̃f�[�^���N���b�v�{�[�h����ǂݍ����
- INSERT ���Ŗ߂�
-   tsv�̂P�s�ڂ̓J���������X�g�Ƃ��Ďg�p����
-   tsvInsert �𗘗p����
-   table_name �͈����œn��
+tsv のデータをクリップボードから読み込んで
+ INSERT 文で戻す
+   tsvの１行目はカラム名リストとして使用する
+   tsvInsert を利用する
+   table_name は引数で渡す
 "@
 function clipTsvInsert ($tableName){
   $clp = Get-Clipboard -Format Text
@@ -68,7 +68,7 @@ function clipTsvInsert ($tableName){
 
 
 $manhash["tsvQt"] = @"
-tsv�̃f�[�^�e���ڂ��u'�v�ŃN�H�[�g����csv�Ŗ߂�
+tsvのデータ各項目を「'」でクォートしてcsvで戻す
 "@
 function tsvQt($tsv) {
   $newCsv = ""
@@ -76,15 +76,15 @@ function tsvQt($tsv) {
   foreach ($line in $lines) {
     $datas = $line -split "`t"
     foreach ($item in $datas) { $newCsv = $newCsv + "'" + $item + "'," }
-    $newCsv = $newCsv.Substring(0, $newCsv.Length - 1)    # �]�v��","���폜
+    $newCsv = $newCsv.Substring(0, $newCsv.Length - 1)    # 余計な","を削除
     $newCsv = $newCsv + "`r`n"
   }
   return($newCsv)
 }
 
 $manhash["clipTsvQt"] = @"
-tsv �̃f�[�^���N���b�v�{�[�h����ǂݍ���� �e���ڂ��u'�v�ŃN�H�[�g����csv�Ŗ߂�
-  tsvQt �𗘗p����
+tsv のデータをクリップボードから読み込んで 各項目を「'」でクォートしてcsvで戻す
+  tsvQt を利用する
 "@
 function clipTsvQt {
   $clp = Get-Clipboard -Format Text
@@ -93,8 +93,8 @@ function clipTsvQt {
 }
 
 $manhash["c2t"] = @"
-csv�̃f�[�^�e���ڂ�tsv�ɂ��Ė߂�
- �����Fcsv ������
+csvのデータ各項目をtsvにして戻す
+ 引数：csv 文字列
 "@
 function c2t($csv) {
   $tsv = ""
@@ -102,15 +102,15 @@ function c2t($csv) {
   foreach ($line in $lines) {
     $datas = $line -split ","
     foreach ($item in $datas) { $tsv = $tsv + $item + "`t" }
-    $tsv = $tsv.Substring(0, $tsv.Length - 1)    # �]�v��"`t"���폜
+    $tsv = $tsv.Substring(0, $tsv.Length - 1)    # 余計な"`t"を削除
     $tsv = $tsv + "`r`n"
   }
   return($tsv)
 }
 
 $manhash["clipc2t"] = @"
-csv �̃f�[�^���N���b�v�{�[�h����ǂݍ���� tsv �ɂ��Ė߂�
-  c2t �𗘗p����
+csv のデータをクリップボードから読み込んで tsv にして戻す
+  c2t を利用する
 "@
 function clipc2t {
   $clp = Get-Clipboard -Format Text
@@ -119,7 +119,7 @@ function clipc2t {
 }
 
 $manhash["csvQt"] = @"
-csv�̃f�[�^�e���ڂ��u'�v�ŃN�H�[�g���Ė߂�
+csvのデータ各項目を「'」でクォートして戻す
 "@
 function csvQt($csv) {
   $newCsv = ""
@@ -127,15 +127,15 @@ function csvQt($csv) {
   foreach ($line in $lines) {
     $datas = $line -split ","
     foreach ($item in $datas) { $newCsv = $newCsv + "'" + $item + "'," }
-    $newCsv = $newCsv.Substring(0, $newCsv.Length - 1)    # �]�v��","���폜
+    $newCsv = $newCsv.Substring(0, $newCsv.Length - 1)    # 余計な","を削除
     $newCsv = $newCsv + "`r`n"
   }
   return($newCsv)
 }
 
 $manhash["clipcsvQt"] = @"
-csv �̃f�[�^���N���b�v�{�[�h����ǂݍ���� �e���ڂ��u'�v�ŃN�H�[�g���Ė߂�
-  csvQt �𗘗p����
+csv のデータをクリップボードから読み込んで 各項目を「'」でクォートして戻す
+  csvQt を利用する
 "@
 function clipcsvQt {
   $clp = Get-Clipboard -Format Text
@@ -144,7 +144,7 @@ function clipcsvQt {
 }
 
 $manhash["clCsv"] = @"
-tsv �̃f�[�^���N���b�v�{�[�h����ǂݍ���� �N�H�[�g���Ȃ��� csv �Ŗ߂�
+tsv のデータをクリップボードから読み込んで クォートしないで csv で戻す
 "@
 function clCsv {
   $clp = Get-Clipboard -Format Text
@@ -156,7 +156,7 @@ function clCsv {
 }
 
 $manhash["clipcsv"] = @"
-tsv �̃f�[�^���N���b�v�{�[�h����ǂݍ���� csv �Ŗ߂�
+tsv のデータをクリップボードから読み込んで csv で戻す
 "@
 function clipcsv {
   $clp = Get-Clipboard -Format Text
@@ -168,7 +168,7 @@ function clipcsv {
 }
 
 $manhash["colcsv"] = @"
-���s��؂�̃f�[�^���N���b�v�{�[�h����ǂ�� csv �Ŗ߂� 
+改行区切りのデータをクリップボードから読んで csv で戻す 
 "@
 function colcsv {
   $clp = Get-Clipboard -Format Text
@@ -179,17 +179,28 @@ function colcsv {
   Set-Clipboard -value $newclp
 }
 
+$manhash["delchar"] = @"
+クリップボードから読んで指定charを取り除いて戻す
+"@
+function delchar($chars) {
+  $clp = Get-Clipboard -Format Text
+  $chars.ToCharArray() | foreach {
+    $clp = $clp.Replace($_.ToString(), "")
+  }
+  Set-Clipboard -value $clp
+}
+
 $manhash["kakkonai"] = @"
-�����s�f�[�^���N���b�v�{�[�h����ǂݍ����
- �J�b�R��������߂�
+複数行データをクリップボードから読み込んで
+ カッコ内だけを戻す
 "@
 function kakkonai {
   $clp = Get-Clipboard -Format Text
   $datas = $clp -split "`n"
   $newclp = ""
   foreach ($item in $datas) { 
-    $m = $item -match "[(�i].*[�j)]"
-    $nakami = $Matches[0] -replace "[()�i�j]", ""
+    $m = $item -match "[(（].*[）)]"
+    $nakami = $Matches[0] -replace "[()（）]", ""
     if ($m) {
       $newclp = $newclp + $nakami + "`n" 
     }
@@ -199,7 +210,7 @@ function kakkonai {
 }
 
 $manhash["clpupp"] = @"
-�������� �f�[�^���N���b�v�{�[�h����ǂݍ���� �啶�� �Ŗ߂�
+小文字の データをクリップボードから読み込んで 大文字 で戻す
  lower case -> upper case
 "@
 function clpupp {
@@ -209,7 +220,7 @@ function clpupp {
 }
 
 $manhash["clplow"] = @"
-�啶���� �f�[�^���N���b�v�{�[�h����ǂݍ���� ������ �Ŗ߂�
+大文字の データをクリップボードから読み込んで 小文字 で戻す
  upper case -> lower case
 "@
 function clplow {
@@ -220,8 +231,8 @@ function clplow {
 
 
 $manhash["coll2u"] = @"
-���s��؂�̏������f�[�^���N���b�v�{�[�h����ǂ��
- �啶�����s��؂�Ŗ߂� 
+改行区切りの小文字データをクリップボードから読んで
+ 大文字改行区切りで戻す 
 "@
 function coll2u {
   $clp = Get-Clipboard -Format Text
@@ -234,8 +245,8 @@ function coll2u {
 
 
 $manhash["colu2l"] = @"
-���s��؂�̑啶���f�[�^���N���b�v�{�[�h����ǂ��
- ���������s��؂�Ŗ߂� 
+改行区切りの大文字データをクリップボードから読んで
+ 小文字改行区切りで戻す 
 "@
 function colu2l {
   $clp = Get-Clipboard -Format Text
@@ -248,8 +259,8 @@ function colu2l {
 
 
 $manhash["colchUL"] = @"
-���s��؂�̕����f�[�^���N���b�v�{�[�h����ǂ��
- �啶���������𔻒肵�A���ꂼ�ꔽ�]�����Ė߂� 
+改行区切りの文字データをクリップボードから読んで
+ 大文字小文字を判定し、それぞれ反転させて戻す 
 "@
 function colchUL {
   $clp = Get-Clipboard -Format Text
@@ -267,8 +278,8 @@ function colchUL {
 }
 
 $manhash["coldelspc"] = @"
-���s��؂�̕����f�[�^���N���b�v�{�[�h����ǂ��
- �󔒂��Ȃ��Ė߂�
+改行区切りの文字データをクリップボードから読んで
+ 空白を省いて戻す
 "@
 function coldelspc {
   $clp = Get-Clipboard -Format Text
@@ -286,8 +297,8 @@ function coldelspc {
 }
 
 $manhash["coldel2"] = @"
-���s��؂�̕����f�[�^���N���b�v�{�[�h����ǂ��
- �󔒂Ɓh,�h���Ȃ��Ė߂�
+改行区切りの文字データをクリップボードから読んで
+ 空白と”,”を省いて戻す
 "@
 function coldel2 {
   $clp = Get-Clipboard -Format Text
@@ -306,10 +317,10 @@ function coldel2 {
 }
 
 $manhash["coldel2swp"] = @"
-�e�s�����s��؂�ŁA�e���ڂ��^�u��؂�̕����f�[�^��
- �N���b�v�{�[�h����ǂ��
- �󔒂Ɓh,�h�̍s���Ȃ��A�������Ȃ��f�[�^��1���ڂ�2���ږڂ�
- ����ւ��Ė߂��B
+各行が改行区切りで、各項目がタブ区切りの文字データを
+ クリップボードから読んで
+ 空白と”,”の行を省き、消去しないデータの1項目と2項目目を
+ 入れ替えて戻す。
 "@
 function coldel2swp {
   $clp = Get-Clipboard -Format Text
@@ -329,15 +340,15 @@ function coldel2swp {
 }
 
 $manhash["memogrep"] = @"
-�����̃������L�[���[�h�Ō�������
+毎日のメモをキーワードで検索する
 "@
 function memogrep($searchWord) { 
   Select-String $searchWord -context 2,8 -path C:\Users\nakaom\memo\*.*
 }
 
 $manhash["manf"] = @"
-�֐��̐�����\������
- �����Ɋ֐���������ƁA���̊֐��̐����̂ݕ\������
+関数の説明を表示する
+ 引数に関数名を入れると、その関数の説明のみ表示する
 "@
 function manf($cmd) {
   if([string]::IsNullorEmpty($cmd)) {
